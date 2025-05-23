@@ -6,7 +6,7 @@ Observe the FastAPI application with three pillars of observability on [Grafana]
 2. Metrics with [Prometheus](https://prometheus.io/) and [Prometheus Python Client](https://github.com/prometheus/client_python)
 3. Logs with [Loki](https://github.com/grafana/loki)
 
-![Observability Architecture](./images/observability-arch.jpg)
+![Observability Architecture](./docs/images/observability-arch.jpg)
 
 ## Table of contents
 - [FastAPI with Observability](#fastapi-with-observability)
@@ -80,7 +80,7 @@ Observe the FastAPI application with three pillars of observability on [Grafana]
 
    Dashboard screenshot:
 
-   ![FastAPI Monitoring Dashboard](./images/dashboard.png)
+   ![FastAPI Monitoring Dashboard](./docs/images/dashboard.png)
 
    The dashboard is also available on [Grafana Dashboards](https://grafana.com/grafana/dashboards/16110).
 
@@ -88,7 +88,7 @@ Observe the FastAPI application with three pillars of observability on [Grafana]
 
 Grafana provides a great solution, which could observe specific actions in service between traces, metrics, and logs through trace ID and exemplar.
 
-![Observability Correlations](./images/observability-correlations.jpeg)
+![Observability Correlations](./docs/images/observability-correlations.jpeg)
 
 Image Source: [Grafana](https://grafana.com/blog/2021/03/31/intro-to-exemplars-which-enable-grafana-tempos-distributed-tracing-at-massive-scale/)
 
@@ -98,19 +98,19 @@ Get Trace ID from an exemplar in metrics, then query in Tempo.
 
 Query: `histogram_quantile(.99,sum(rate(fastapi_requests_duration_seconds_bucket{app_name="app-a", path!="/metrics"}[1m])) by(path, le))`
 
-![Metrics to Traces](./images/metrics-to-traces.png)
+![Metrics to Traces](./docs/images/metrics-to-traces.png)
 
 ### Traces to Logs
 
 Get Trace ID and tags (here is `service.name`) defined in Tempo data source from span, then query with Loki.
 
-![Traces to Logs](./images/traces-to-logs.png)
+![Traces to Logs](./docs/images/traces-to-logs.png)
 
 ### Logs to Traces
 
 Get Trace ID from log (regex defined in Loki data source), then query in Tempo.
 
-![Logs to Traces](./images/logs-to-traces.png)
+![Logs to Traces](./docs/images/logs-to-traces.png)
 
 ## Detail
 
@@ -149,7 +149,7 @@ def setting_otlp(app: ASGIApp, app_name: str, endpoint: str, log_correlation: bo
 
 The following image shows the span info sent to Tempo and queried on Grafana. Trace span info provided by `FastAPIInstrumentor` with trace ID (ef106bd57e5d8223a23ee9e3c93be73b), span id(b4fff543781f9beb), service name(app-a), custom attributes(service.name=app-a) and so on.
 
-![Span Information](./images/span-info.png)
+![Span Information](./docs/images/span-info.png)
 
 Log format with trace id and span id, which is overridden by `LoggingInstrumentor``
 
@@ -159,7 +159,7 @@ Log format with trace id and span id, which is overridden by `LoggingInstrumento
 
 The following image is what the logs look like.
 
-![Log With Trace ID And Span ID](./images/log-format.png)
+![Log With Trace ID And Span ID](./docs/images/log-format.png)
 
 #### Span Inject
 
@@ -248,7 +248,7 @@ def metrics(request: Request) -> Response:
 
 Metrics with exemplars
 
-![Metrics With Exemplars](./images/metrics-with-exemplars.png)
+![Metrics With Exemplars](./docs/images/metrics-with-exemplars.png)
 
 #### OpenTelemetry Instrumentation
 
@@ -272,14 +272,6 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['app-a:8000']
-  - job_name: 'app-b'
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['app-b:8000']
-  - job_name: 'app-c'
-    scrape_interval: 5s
-    static_configs:
-      - targets: ['app-c:8000']
 ```
 
 #### Grafana Data Source
@@ -288,7 +280,7 @@ Add an Exemplars which uses the value of `TraceID` label to create a Tempo link.
 
 Grafana data source setting example:
 
-![Data Source of Prometheus: Exemplars](./images/prometheus-exemplars.png)
+![Data Source of Prometheus: Exemplars](./docs/images/prometheus-exemplars.png)
 
 Grafana data sources config example:
 
@@ -327,7 +319,7 @@ Receives spans from applications.
 
 Grafana data source setting example:
 
-![Data Source of Tempo: Trace to logs](./images/tempo-trace-to-logs.png)
+![Data Source of Tempo: Trace to logs](./docs/images/tempo-trace-to-logs.png)
 
 Grafana data sources config example:
 
@@ -395,7 +387,7 @@ Add a TraceID derived field to extract the trace id and create a Tempo link from
 
 Grafana data source setting example:
 
-![Data Source of Loki: Derived fields](./images/loki-derive-fields.png)
+![Data Source of Loki: Derived fields](./docs/images/loki-derive-fields.png)
 
 Grafana data source config example:
 

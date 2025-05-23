@@ -3,19 +3,13 @@ import os
 import random
 import time
 from typing import Optional
-
-import httpx
 import uvicorn
 from fastapi import FastAPI, Response
-from opentelemetry.propagate import inject
 from utils import PrometheusMiddleware, metrics, setting_otlp
 
 APP_NAME = os.environ.get("APP_NAME", "app")
 EXPOSE_PORT = os.environ.get("EXPOSE_PORT", 8000)
 OTLP_GRPC_ENDPOINT = os.environ.get("OTLP_GRPC_ENDPOINT", "tempo:4317")
-
-TARGET_ONE_HOST = os.environ.get("TARGET_ONE_HOST", "app-b")
-TARGET_TWO_HOST = os.environ.get("TARGET_TWO_HOST", "app-c")
 
 app = FastAPI()
 
@@ -82,31 +76,6 @@ async def random_sleep(response: Response):
 async def error_test(response: Response):
     logging.error("got error!!!!")
     raise ValueError("value error")
-
-
-@app.get("/chain")
-async def chain(response: Response):
-    headers = {}
-    inject(headers)  # inject trace info to header
-    logging.critical(headers)
-
-    async with httpx.AsyncClient() as client:
-        await client.get(
-            "http://localhost:8000/",
-            headers=headers,
-        )
-    async with httpx.AsyncClient() as client:
-        await client.get(
-            f"http://{TARGET_ONE_HOST}:8000/io_task",
-            headers=headers,
-        )
-    async with httpx.AsyncClient() as client:
-        await client.get(
-            f"http://{TARGET_TWO_HOST}:8000/cpu_task",
-            headers=headers,
-        )
-    logging.info("Chain Finished")
-    return {"path": "/chain"}
 
 
 if __name__ == "__main__":
