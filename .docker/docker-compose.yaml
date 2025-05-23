@@ -9,15 +9,17 @@ x-logging: &default-logging
       - regex:
           expression: '^(?P<time>\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2},\d{3}) (?P<message>(?s:.*))$$'
 
+name: fastapi-observability
 services:
   loki:
+    container_name: loki
     image: grafana/loki:3.5.0
     command: -config.file=/etc/loki/local-config.yaml
     ports:
       - "3100:3100"
 
   app-a:
-    # build: ./fastapi_app/
+    container_name: app-a
     image: ghcr.io/blueswen/fastapi-observability/app:latest
     ports:
       - "8000:8000"
@@ -28,11 +30,12 @@ services:
     logging: *default-logging
 
   prometheus:
+    container_name: prometheus
     image: prom/prometheus:v3.3.1
     ports:
       - "9090:9090"
     volumes:
-      - ./etc/prometheus:/workspace
+      - ../config/prometheus:/workspace
     command:
       - --config.file=/workspace/prometheus.yml
       - --enable-feature=exemplar-storage
@@ -41,18 +44,20 @@ services:
     logging: *default-logging
 
   tempo:
+    container_name: tempo
     image: grafana/tempo:2.7.2
     command: [ "-config.file=/etc/tempo.yml", "--target=all", "--storage.trace.backend=local", "--storage.trace.local.path=/var/tempo", "--auth.enabled=false" ]
     ports:
       - "4317:4317"
       - "4318:4318"
     volumes:
-      - ./etc/tempo/tempo.yml:/etc/tempo.yml
+      - ../config/tempo/tempo.yml:/etc/tempo.yml
     depends_on:
       - loki
     logging: *default-logging
 
   grafana:
+    container_name: grafana
     image: grafana/grafana:12.0.0
     ports:
       - "3000:3000"
@@ -62,9 +67,9 @@ services:
       - GF_DATE_FORMATS_DEFAULT_TIMEZONE=Europe/Madrid
       - GF_USERS_DEFAULT_LANGUAGE=es-ES
     volumes:
-      - ./etc/grafana/:/etc/grafana/provisioning/datasources
-      - ./etc/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
-      - ./etc/dashboards:/etc/grafana/dashboards
+      - ../config/grafana/:/etc/grafana/provisioning/datasources
+      - ../config/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ../config/dashboards:/etc/grafana/dashboards
     depends_on:
       - loki
       - prometheus
