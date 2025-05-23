@@ -56,6 +56,11 @@ services:
     image: grafana/grafana:12.0.0
     ports:
       - "3000:3000"
+    environment:
+      - GF_USERS_DEFAULT_THEME=dark
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/dashboards/fastapi-observability.json
+      - GF_DATE_FORMATS_DEFAULT_TIMEZONE=Europe/Madrid
+      - GF_USERS_DEFAULT_LANGUAGE=es-ES
     volumes:
       - ./etc/grafana/:/etc/grafana/provisioning/datasources
       - ./etc/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
