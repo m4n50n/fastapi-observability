@@ -20,7 +20,7 @@ services:
 
   app-a:
     container_name: app-a
-    image: ghcr.io/blueswen/fastapi-observability/app:latest
+    build: ../fastapi_app/
     ports:
       - "8000:8000"
     depends_on:
